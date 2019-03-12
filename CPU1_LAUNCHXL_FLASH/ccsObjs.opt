@@ -1,0 +1,1 @@
+"./pwm5a5b_on_launchpad.obj" "./device/device.obj" "./device/f28004x_codestartbranch.obj" "../28004x_generic_flash_lnk.cmd" "../driverlib.lib" -llibc.a 

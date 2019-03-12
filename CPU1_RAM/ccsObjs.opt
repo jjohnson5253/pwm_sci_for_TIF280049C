@@ -1,0 +1,1 @@
+"./pwm_for_PCB_2.obj" "./device/device.obj" "./device/f28004x_codestartbranch.obj" "../280049C_RAM_lnk.cmd" "../driverlib.lib" -llibc.a 
