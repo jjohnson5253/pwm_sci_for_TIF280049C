@@ -1,7 +1,7 @@
 ******************************************************************************
              TMS320C2000 Linker PC v18.1.3                     
 ******************************************************************************
->> Linked Mon Mar 11 23:05:37 2019
+>> Linked Tue Mar 12 00:29:02 2019
 
 OUTPUT FILE NAME:   <pwm5a5b_on_launchpad.out>
 ENTRY POINT SYMBOL: "code_start"  address: 00000000
@@ -24,7 +24,7 @@ PAGE 0:
 PAGE 1:
   BOOT_RSVD             00000002   000000f3  00000000  000000f3  RWIX
   RAMM1                 00000400   00000400  00000100  00000300  RWIX
-  RAMLS5                0000a800   00000800  000004dd  00000323  RWIX
+  RAMLS5                0000a800   00000800  000004c3  0000033d  RWIX
   RAMLS6                0000b000   00000800  00000000  00000800  RWIX
   RAMLS7                0000b800   00000800  00000000  00000800  RWIX
   RAMGS0                0000c000   00002000  00000000  00002000  RWIX
@@ -69,25 +69,24 @@ codestart
 .stack     1    00000400    00000100     UNINITIALIZED
                   00000400    00000100     --HOLE--
 
-.econst    1    0000a800    000004ab     
-                  0000a800    00000185     pwm5a5b_on_launchpad.obj (.econst:.string)
-                  0000a985    00000001     --HOLE-- [fill = 0]
-                  0000a986    000000af     driverlib.lib : flash.obj (.econst:.string)
-                  0000aa35    00000001     --HOLE-- [fill = 0]
-                  0000aa36    000000ae                   : sysctl.obj (.econst:.string)
-                  0000aae4    000000ac                   : gpio.obj (.econst:.string)
-                  0000ab90    000000ab                   : sci.obj (.econst:.string)
-                  0000ac3b    00000001     --HOLE-- [fill = 0]
-                  0000ac3c    0000005b                   : interrupt.obj (.econst:.string)
-                  0000ac97    00000001     --HOLE-- [fill = 0]
-                  0000ac98    00000013     device.obj (.econst:.string)
+.econst    1    0000a800    0000049b     
+                  0000a800    00000175     pwm5a5b_on_launchpad.obj (.econst:.string)
+                  0000a975    00000001     --HOLE-- [fill = 0]
+                  0000a976    000000af     driverlib.lib : flash.obj (.econst:.string)
+                  0000aa25    00000001     --HOLE-- [fill = 0]
+                  0000aa26    000000ae                   : sysctl.obj (.econst:.string)
+                  0000aad4    000000ac                   : gpio.obj (.econst:.string)
+                  0000ab80    000000ab                   : sci.obj (.econst:.string)
+                  0000ac2b    00000001     --HOLE-- [fill = 0]
+                  0000ac2c    0000005b                   : interrupt.obj (.econst:.string)
+                  0000ac87    00000001     --HOLE-- [fill = 0]
+                  0000ac88    00000013     device.obj (.econst:.string)
 
-.ebss      1    0000acac    00000032     UNINITIALIZED
-                  0000acac    00000006     rts2800_fpu32.lib : exit.c.obj (.ebss)
-                  0000acb2    00000002                       : _lock.c.obj (.ebss:__lock)
-                  0000acb4    00000002                       : _lock.c.obj (.ebss:__unlock)
-                  0000acb6    0000000a     --HOLE--
-                  0000acc0    0000001e     pwm5a5b_on_launchpad.obj (.ebss)
+.ebss      1    0000ac9c    00000028     UNINITIALIZED
+                  0000ac9c    0000001e     pwm5a5b_on_launchpad.obj (.ebss)
+                  0000acba    00000006     rts2800_fpu32.lib : exit.c.obj (.ebss)
+                  0000acc0    00000002                       : _lock.c.obj (.ebss:__lock)
+                  0000acc2    00000002                       : _lock.c.obj (.ebss:__unlock)
 
 .text.1    0    00000245    000001bb     
                   00000245    00000164     device.obj (.text)
@@ -158,9 +157,9 @@ MODULE SUMMARY
        Module                        code   initialized data   uninitialized data
        ------                        ----   ----------------   ------------------
     .\
-       pwm5a5b_on_launchpad.obj      1919   389                30                
+       pwm5a5b_on_launchpad.obj      1919   373                30                
     +--+-----------------------------+------+------------------+--------------------+
-       Total:                        1919   389                30                
+       Total:                        1919   373                30                
                                                                                  
     .\device\
        device.obj                    356    19                 0                 
@@ -191,7 +190,7 @@ MODULE SUMMARY
                                                                                  
        Stack:                        0      0                  256               
     +--+-----------------------------+------+------------------+--------------------+
-       Grand Total:                  4774   1215               296               
+       Grand Total:                  4774   1199               296               
 
 
 GLOBAL DATA SYMBOLS: SORTED BY DATA PAGE
@@ -200,15 +199,15 @@ address     data page           name
 --------    ----------------    ----
 00000400      10 (00000400)     __stack
 
-0000acac     2b2 (0000ac80)     ___TI_enable_exit_profile_output
-0000acae     2b2 (0000ac80)     ___TI_cleanup_ptr
-0000acb0     2b2 (0000ac80)     ___TI_dtors_ptr
-0000acb2     2b2 (0000ac80)     __lock
-0000acb4     2b2 (0000ac80)     __unlock
+0000ac9c     2b2 (0000ac80)     _epwm2Info
+0000aca6     2b2 (0000ac80)     _epwm1Info
+0000acb0     2b2 (0000ac80)     _epwm5Info
+0000acba     2b2 (0000ac80)     ___TI_enable_exit_profile_output
+0000acbc     2b2 (0000ac80)     ___TI_cleanup_ptr
+0000acbe     2b2 (0000ac80)     ___TI_dtors_ptr
 
-0000acc0     2b3 (0000acc0)     _epwm2Info
-0000acca     2b3 (0000acc0)     _epwm1Info
-0000acd4     2b3 (0000acc0)     _epwm5Info
+0000acc0     2b3 (0000acc0)     __lock
+0000acc2     2b3 (0000acc0)     __unlock
 
 
 GLOBAL SYMBOLS: SORTED ALPHABETICALLY BY Name 
@@ -242,9 +241,9 @@ abs   ffffffff  .text
 0     000086da  _SysCtl_setClock                
 1     00000500  __STACK_END                     
 abs   00000100  __STACK_SIZE                    
-1     0000acae  ___TI_cleanup_ptr               
-1     0000acb0  ___TI_dtors_ptr                 
-1     0000acac  ___TI_enable_exit_profile_output
+1     0000acbc  ___TI_cleanup_ptr               
+1     0000acbe  ___TI_dtors_ptr                 
+1     0000acba  ___TI_enable_exit_profile_output
 abs   ffffffff  ___TI_pprof_out_hndl            
 abs   ffffffff  ___TI_prof_data_size            
 abs   ffffffff  ___TI_prof_data_start           
@@ -256,30 +255,30 @@ abs   ffffffff  ___etext__
 abs   ffffffff  ___pinit__                      
 abs   ffffffff  ___text__                       
 0     00008e52  __args_main                     
-1     0000acb2  __lock                          
+1     0000acc0  __lock                          
 0     00008faa  __nop                           
 0     00008fa6  __register_lock                 
 0     00008fa2  __register_unlock               
 1     00000400  __stack                         
 0     000003ff  __system_post_cinit             
 0     00008fb2  __system_pre_init               
-1     0000acb4  __unlock                        
+1     0000acc2  __unlock                        
 0     00008c7e  _abort                          
 0     000089aa  _c_int00                        
 0     00008cf0  _copy_in                        
 0     000088a7  _epwm1ISR                       
-1     0000acca  _epwm1Info                      
+1     0000aca6  _epwm1Info                      
 0     000088de  _epwm2ISR                       
-1     0000acc0  _epwm2Info                      
+1     0000ac9c  _epwm2Info                      
 0     00008915  _epwm5ISR                       
-1     0000acd4  _epwm5Info                      
+1     0000acb0  _epwm5Info                      
 0     00008c80  _exit                           
-0     000084ca  _initEPWM1                      
-0     00008555  _initEPWM2                      
-0     000085df  _initEPWM5                      
+0     0000851c  _initEPWM1                      
+0     000085a7  _initEPWM2                      
+0     00008631  _initEPWM5                      
 0     00008379  _main                           
 0     00008db4  _memcpy                         
-0     00008669  _updateCompare                  
+0     000086bd  _updateCompare                  
 abs   ffffffff  binit                           
 0     0000022b  cinit                           
 0     00000000  code_start                      
@@ -303,10 +302,10 @@ page  address   name
 0     000003a9  _SysCtl_selectOscSource         
 0     000003ff  __system_post_cinit             
 0     00008379  _main                           
-0     000084ca  _initEPWM1                      
-0     00008555  _initEPWM2                      
-0     000085df  _initEPWM5                      
-0     00008669  _updateCompare                  
+0     0000851c  _initEPWM1                      
+0     000085a7  _initEPWM2                      
+0     00008631  _initEPWM5                      
+0     000086bd  _updateCompare                  
 0     000086da  _SysCtl_setClock                
 0     0000878d  _SysCtl_getClock                
 0     00008800  _SysCtl_isPLLValid              
@@ -340,14 +339,14 @@ page  address   name
 0     00008fb2  __system_pre_init               
 1     00000400  __stack                         
 1     00000500  __STACK_END                     
-1     0000acac  ___TI_enable_exit_profile_output
-1     0000acae  ___TI_cleanup_ptr               
-1     0000acb0  ___TI_dtors_ptr                 
-1     0000acb2  __lock                          
-1     0000acb4  __unlock                        
-1     0000acc0  _epwm2Info                      
-1     0000acca  _epwm1Info                      
-1     0000acd4  _epwm5Info                      
+1     0000ac9c  _epwm2Info                      
+1     0000aca6  _epwm1Info                      
+1     0000acb0  _epwm5Info                      
+1     0000acba  ___TI_enable_exit_profile_output
+1     0000acbc  ___TI_cleanup_ptr               
+1     0000acbe  ___TI_dtors_ptr                 
+1     0000acc0  __lock                          
+1     0000acc2  __unlock                        
 abs   00000100  __STACK_SIZE                    
 abs   ffffffff  .text                           
 abs   ffffffff  ___TI_pprof_out_hndl            

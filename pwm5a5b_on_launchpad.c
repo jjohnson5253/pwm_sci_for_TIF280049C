@@ -78,6 +78,12 @@
 #define EPWM2_MAX_CMPB     1950U
 #define EPWM2_MIN_CMPB       50U
 
+//#define EPWM5_TIMER_TBPRD  2000U // about 25kHz
+#define EPWM5_TIMER_TBPRD  4000U // about 25kHz
+#define EPWM5_MAX_CMPA     2000U // 50% duty cycle
+#define EPWM5_MIN_CMPA     2000U
+#define EPWM5_MAX_CMPB     2000U
+#define EPWM5_MIN_CMPB     2000U
 
 //#define EPWM5_TIMER_TBPRD  2000U
 //#define EPWM5_MAX_CMPA     1950U
@@ -275,12 +281,18 @@ void main(void)
     //
     for(;;)
     {
-        msg = "\r\n\nChoose a command: \n\0";
-        SCI_writeCharArray(SCIA_BASE, (uint16_t*)msg, 24);
-        msg = "\r\n 1. Turn ON LED \n\0";
-        SCI_writeCharArray(SCIA_BASE, (uint16_t*)msg, 17);
-        msg = "\r\n 2. Turn OFF LED \n\0";
-        SCI_writeCharArray(SCIA_BASE, (uint16_t*)msg, 18);
+        msg = "\r\n\nChoose a duty cycle or period: \n\0";
+        SCI_writeCharArray(SCIA_BASE, (uint16_t*)msg, 36);
+        msg = "\r\n 1. 25% \n\0";
+        SCI_writeCharArray(SCIA_BASE, (uint16_t*)msg, 9);
+        msg = "\r\n 2. 50% \n\0";
+        SCI_writeCharArray(SCIA_BASE, (uint16_t*)msg, 9);
+        msg = "\r\n 3. 75% \n\0";
+        SCI_writeCharArray(SCIA_BASE, (uint16_t*)msg, 9);
+        msg = "\r\n 4. 56kHz \n\0";
+        SCI_writeCharArray(SCIA_BASE, (uint16_t*)msg, 11);
+        msg = "\r\n 5. 25kHz \n\0";
+        SCI_writeCharArray(SCIA_BASE, (uint16_t*)msg, 11);
         msg = "\r\n\nEnter number: \0";
         SCI_writeCharArray(SCIA_BASE, (uint16_t*)msg, 17);
 
@@ -291,24 +303,53 @@ void main(void)
 
         //TODO: Figure out how to print to console for debugging,etc.
 
-        if (receivedChar == 49){
-            msg = "\r\nYou chose to turn LED ON\n\0";
-            SCI_writeCharArray(SCIA_BASE, (uint16_t*)msg, 28);
+        if (receivedChar == 49){ // option 1
 
             // Turn on LED
             GPIO_writePin(DEVICE_GPIO_PIN_LED1, 0);
 
-            EPWM_setTimeBasePeriod(EPWM5_BASE, 8000U);
+            // 25% duty cycle
+            EPWM_setCounterCompareValue(EPWM5_BASE, EPWM_COUNTER_COMPARE_A, 3000);
+            EPWM_setCounterCompareValue(EPWM5_BASE, EPWM_COUNTER_COMPARE_B, 3000);
 
         }
-        else if (receivedChar == 50){
-            msg = "\r\nYou chose to turn LED OFF\n\0";
-            SCI_writeCharArray(SCIA_BASE, (uint16_t*)msg, 29);
+        else if (receivedChar == 50){ // option 2
 
             // Turn off LED
             GPIO_writePin(DEVICE_GPIO_PIN_LED1, 1);
 
-            EPWM_setTimeBasePeriod(EPWM5_BASE, 4000U);
+            // 50% duty cycle
+            EPWM_setCounterCompareValue(EPWM5_BASE, EPWM_COUNTER_COMPARE_A, 2000);
+            EPWM_setCounterCompareValue(EPWM5_BASE, EPWM_COUNTER_COMPARE_B, 2000);
+
+        }
+        else if (receivedChar == 51){ // option 3
+
+            // Turn off LED
+            GPIO_writePin(DEVICE_GPIO_PIN_LED1, 1);
+
+            // 75% duty cycle
+            EPWM_setCounterCompareValue(EPWM5_BASE, EPWM_COUNTER_COMPARE_A, 1000);
+            EPWM_setCounterCompareValue(EPWM5_BASE, EPWM_COUNTER_COMPARE_B, 1000);
+
+        }
+        else if (receivedChar == 52){ // option 4
+
+            // Turn off LED
+            GPIO_writePin(DEVICE_GPIO_PIN_LED1, 1);
+
+            // 50 kHz
+            EPWM_setTimeBasePeriod(EPWM5_BASE, EPWM5_TIMER_TBPRD);
+
+        }
+        else if (receivedChar == 52){ // option 5
+
+            // Turn off LED
+            GPIO_writePin(DEVICE_GPIO_PIN_LED1, 1);
+
+            // 25 kHz
+            EPWM_setTimeBasePeriod(EPWM5_BASE, 2000);
+
         }
         else{
             msg = "\r\nPlease choose one of the options\n\0";
@@ -673,19 +714,19 @@ void updateCompare(epwmInformation *epwmInfo)
         //
         if(epwmInfo->epwmCompADirection == EPWM_CMP_UP)
         {
-            if(compAValue < (epwmInfo->epwmMaxCompA))
-            {
-                EPWM_setCounterCompareValue(epwmInfo->epwmModule,
-                                            EPWM_COUNTER_COMPARE_A,
-                                            ++compAValue);
-            }
-            else
-            {
-                epwmInfo->epwmCompADirection = EPWM_CMP_DOWN;
-                EPWM_setCounterCompareValue(epwmInfo->epwmModule,
-                                            EPWM_COUNTER_COMPARE_A,
-                                            --compAValue);
-            }
+//            if(compAValue < (epwmInfo->epwmMaxCompA))
+//            {
+//                EPWM_setCounterCompareValue(epwmInfo->epwmModule,
+//                                            EPWM_COUNTER_COMPARE_A,
+//                                            ++compAValue);
+//            }
+//            else
+//            {
+//                epwmInfo->epwmCompADirection = EPWM_CMP_DOWN;
+//                EPWM_setCounterCompareValue(epwmInfo->epwmModule,
+//                                            EPWM_COUNTER_COMPARE_A,
+//                                            --compAValue);
+//            }
         }
         //
         // If we were decreasing CMPA, check to see if we reached the min
@@ -694,19 +735,19 @@ void updateCompare(epwmInformation *epwmInfo)
         //
         else
         {
-            if( compAValue == (epwmInfo->epwmMinCompA))
-            {
-                epwmInfo->epwmCompADirection = EPWM_CMP_UP;
-                EPWM_setCounterCompareValue(epwmInfo->epwmModule,
-                                            EPWM_COUNTER_COMPARE_A,
-                                            ++compAValue);
-            }
-            else
-            {
-                EPWM_setCounterCompareValue(epwmInfo->epwmModule,
-                                            EPWM_COUNTER_COMPARE_A,
-                                            --compAValue);
-            }
+//            if( compAValue == (epwmInfo->epwmMinCompA))
+//            {
+//                epwmInfo->epwmCompADirection = EPWM_CMP_UP;
+//                EPWM_setCounterCompareValue(epwmInfo->epwmModule,
+//                                            EPWM_COUNTER_COMPARE_A,
+//                                            ++compAValue);
+//            }
+//            else
+//            {
+//                EPWM_setCounterCompareValue(epwmInfo->epwmModule,
+//                                            EPWM_COUNTER_COMPARE_A,
+//                                            --compAValue);
+//            }
         }
 
         //
@@ -716,19 +757,19 @@ void updateCompare(epwmInformation *epwmInfo)
         //
         if(epwmInfo->epwmCompBDirection == EPWM_CMP_UP)
         {
-            if(compBValue < (epwmInfo->epwmMaxCompB))
-            {
-                EPWM_setCounterCompareValue(epwmInfo->epwmModule,
-                                            EPWM_COUNTER_COMPARE_B,
-                                            ++compBValue);
-            }
-            else
-            {
-                epwmInfo->epwmCompBDirection = EPWM_CMP_DOWN;
-                EPWM_setCounterCompareValue(epwmInfo->epwmModule,
-                                            EPWM_COUNTER_COMPARE_B,
-                                            --compBValue);
-            }
+//            if(compBValue < (epwmInfo->epwmMaxCompB))
+//            {
+//                EPWM_setCounterCompareValue(epwmInfo->epwmModule,
+//                                            EPWM_COUNTER_COMPARE_B,
+//                                            ++compBValue);
+//            }
+//            else
+//            {
+//                epwmInfo->epwmCompBDirection = EPWM_CMP_DOWN;
+//                EPWM_setCounterCompareValue(epwmInfo->epwmModule,
+//                                            EPWM_COUNTER_COMPARE_B,
+//                                            --compBValue);
+//            }
         }
         //
         // If we were decreasing CMPB, check to see if we reached the min
@@ -737,19 +778,19 @@ void updateCompare(epwmInformation *epwmInfo)
         //
         else
         {
-            if(compBValue == (epwmInfo->epwmMinCompB))
-            {
-                epwmInfo->epwmCompBDirection = EPWM_CMP_UP;
-                EPWM_setCounterCompareValue(epwmInfo->epwmModule,
-                                            EPWM_COUNTER_COMPARE_B,
-                                            ++compBValue);
-            }
-            else
-            {
-                EPWM_setCounterCompareValue(epwmInfo->epwmModule,
-                                            EPWM_COUNTER_COMPARE_B,
-                                            --compBValue);
-            }
+//            if(compBValue == (epwmInfo->epwmMinCompB))
+//            {
+//                epwmInfo->epwmCompBDirection = EPWM_CMP_UP;
+//                EPWM_setCounterCompareValue(epwmInfo->epwmModule,
+//                                            EPWM_COUNTER_COMPARE_B,
+//                                            ++compBValue);
+//            }
+//            else
+//            {
+//                EPWM_setCounterCompareValue(epwmInfo->epwmModule,
+//                                            EPWM_COUNTER_COMPARE_B,
+//                                            --compBValue);
+//            }
         }
     }
     else
