@@ -7,7 +7,7 @@
 //! \addtogroup driver_example_list
 //! <h1> ePWM Up Down Count Action Qualifier</h1>
 //!
-//! This example configures ePWM1, ePWM2, ePWM3 to produce a waveform with
+//! This example configures ePWM1, ePWM2, EPWM5 to produce a waveform with
 //! independent modulation on ePWMxA and ePWMxB.
 //!
 //! The compare values CMPA and CMPB are modified within the ePWM's ISR.
@@ -15,7 +15,7 @@
 //! The TB counter is in up/down count mode for this example.
 //!
 //! View the ePWM1A/B(GPIO0 & GPIO1), ePWM2A/B(GPIO2 &GPIO3)
-//! and ePWM3A/B(GPIO4 & GPIO5) waveforms on oscilloscope.
+//! and EPWM5A/B(GPIO4 & GPIO5) waveforms on oscilloscope.
 //
 //#############################################################################
 // $TI Release: F28004x Support Library v1.05.00.00 $
@@ -78,11 +78,21 @@
 #define EPWM2_MAX_CMPB     1950U
 #define EPWM2_MIN_CMPB       50U
 
-#define EPWM3_TIMER_TBPRD  4000U
-#define EPWM3_MAX_CMPA      950U
-#define EPWM3_MIN_CMPA       50U
-#define EPWM3_MAX_CMPB     1950U
-#define EPWM3_MIN_CMPB     1050U
+
+//#define EPWM5_TIMER_TBPRD  2000U
+//#define EPWM5_MAX_CMPA     1950U
+//#define EPWM5_MIN_CMPA     50U
+//#define EPWM5_MAX_CMPB     1950U
+//#define EPWM5_MIN_CMPB     50U
+
+// 2000, 1000 is about 25% duty cycle
+
+//50% duty cycle with orignal pwm3 example code
+//#define EPWM5_TIMER_TBPRD  2000U
+//#define EPWM5_MAX_CMPA     100U
+//#define EPWM5_MIN_CMPA     100U
+//#define EPWM5_MAX_CMPB     100U
+//#define EPWM5_MIN_CMPB     100U
 
 #define EPWM_CMP_UP           1U
 #define EPWM_CMP_DOWN         0U
@@ -107,17 +117,17 @@ typedef struct
 //
 epwmInformation epwm1Info;
 epwmInformation epwm2Info;
-epwmInformation epwm3Info;
+epwmInformation epwm5Info;
 
 //
 // Function Prototypes
 //
 void initEPWM1(void);
 void initEPWM2(void);
-void initEPWM3(void);
+void initEPWM5(void);
 __interrupt void epwm1ISR(void);
 __interrupt void epwm2ISR(void);
-__interrupt void epwm3ISR(void);
+__interrupt void epwm5ISR(void);
 void updateCompare(epwmInformation *epwmInfo);
 
 //
@@ -155,15 +165,15 @@ void main(void)
     //
     Interrupt_register(INT_EPWM1, &epwm1ISR);
     Interrupt_register(INT_EPWM2, &epwm2ISR);
-    Interrupt_register(INT_EPWM3, &epwm3ISR);
+    Interrupt_register(INT_EPWM5, &epwm5ISR);
 
     //
     // Configure GPIO0/1 , GPIO2/3 and GPIO4/5 as ePWM1A/1B, ePWM2A/2B and
-    // ePWM3A/3B pins respectively
+    // EPWM5A/3B pins respectively
     //
-    GPIO_setPadConfig(9, GPIO_PIN_TYPE_STD);
+    GPIO_setPadConfig(0, GPIO_PIN_TYPE_STD);
     GPIO_setPinConfig(GPIO_0_EPWM1A);
-    GPIO_setPadConfig(8, GPIO_PIN_TYPE_STD);
+    GPIO_setPadConfig(1, GPIO_PIN_TYPE_STD);
     GPIO_setPinConfig(GPIO_1_EPWM1B);
 
     GPIO_setPadConfig(2, GPIO_PIN_TYPE_STD);
@@ -172,9 +182,9 @@ void main(void)
     GPIO_setPinConfig(GPIO_3_EPWM2B);
 
 //    GPIO_setPadConfig(4, GPIO_PIN_TYPE_STD);
-//    GPIO_setPinConfig(GPIO_4_EPWM3A);
+//    GPIO_setPinConfig(GPIO_4_EPWM5A);
 //    GPIO_setPadConfig(5, GPIO_PIN_TYPE_STD);
-//    GPIO_setPinConfig(GPIO_5_EPWM3B);
+//    GPIO_setPinConfig(GPIO_5_EPWM5B);
 
     GPIO_setPadConfig(8, GPIO_PIN_TYPE_STD);
     GPIO_setPinConfig(GPIO_8_EPWM5A);
@@ -240,7 +250,7 @@ void main(void)
 
     initEPWM1();
     initEPWM2();
-    initEPWM3();
+    initEPWM5();
 
     //
     // Enable sync and clock to PWM
@@ -252,7 +262,7 @@ void main(void)
     //
     Interrupt_enable(INT_EPWM1);
     Interrupt_enable(INT_EPWM2);
-    Interrupt_enable(INT_EPWM3);
+    Interrupt_enable(INT_EPWM5);
 
     //
     // Enable Global Interrupt (INTM) and realtime interrupt (DBGM)
@@ -287,6 +297,9 @@ void main(void)
 
             // Turn on LED
             GPIO_writePin(DEVICE_GPIO_PIN_LED1, 0);
+
+            EPWM_setTimeBasePeriod(EPWM5_BASE, 8000U);
+
         }
         else if (receivedChar == 50){
             msg = "\r\nYou chose to turn LED OFF\n\0";
@@ -294,6 +307,8 @@ void main(void)
 
             // Turn off LED
             GPIO_writePin(DEVICE_GPIO_PIN_LED1, 1);
+
+            EPWM_setTimeBasePeriod(EPWM5_BASE, 4000U);
         }
         else{
             msg = "\r\nPlease choose one of the options\n\0";
@@ -355,14 +370,14 @@ __interrupt void epwm2ISR(void)
 }
 
 //
-// epwm3ISR - ePWM 3 ISR
+// EPWM5ISR - ePWM 3 ISR
 //
-__interrupt void epwm3ISR(void)
+__interrupt void epwm5ISR(void)
 {
     //
     // Update the CMPA and CMPB values
     //
-    updateCompare(&epwm3Info);
+    updateCompare(&epwm5Info);
 
     //
     // Clear INT flag for this timer
@@ -546,18 +561,32 @@ void initEPWM2()
 }
 
 //
-// initEPWM3 - Configure ePWM3
+// initEPWM5 - Configure EPWM5
 //
-void initEPWM3(void)
+void initEPWM5(void)
 {
     //
     // Set-up TBCLK
     //
-    EPWM_setTimeBaseCounterMode(EPWM5_BASE, EPWM_COUNTER_MODE_UP_DOWN);
-    EPWM_setTimeBasePeriod(EPWM5_BASE, EPWM3_TIMER_TBPRD);
-    EPWM_disablePhaseShiftLoad(EPWM5_BASE);
+    EPWM_setTimeBasePeriod(EPWM5_BASE, EPWM5_TIMER_TBPRD);
     EPWM_setPhaseShift(EPWM5_BASE, 0U);
     EPWM_setTimeBaseCounter(EPWM5_BASE, 0U);
+
+    //
+    // Set Compare values
+    //
+    EPWM_setCounterCompareValue(EPWM5_BASE,
+                                EPWM_COUNTER_COMPARE_A,
+                                EPWM5_MIN_CMPA);
+    EPWM_setCounterCompareValue(EPWM5_BASE,
+                                EPWM_COUNTER_COMPARE_B,
+                                EPWM5_MAX_CMPB);
+
+    //
+    // Set up counter mode
+    //
+    EPWM_setTimeBaseCounterMode(EPWM5_BASE, EPWM_COUNTER_MODE_UP_DOWN);
+    EPWM_disablePhaseShiftLoad(EPWM5_BASE);
     EPWM_setClockPrescaler(EPWM5_BASE,
                            EPWM_CLOCK_DIVIDER_1,
                            EPWM_HSCLOCK_DIVIDER_1);
@@ -568,21 +597,9 @@ void initEPWM3(void)
     EPWM_setCounterCompareShadowLoadMode(EPWM5_BASE,
                                          EPWM_COUNTER_COMPARE_A,
                                          EPWM_COMP_LOAD_ON_CNTR_ZERO);
-
     EPWM_setCounterCompareShadowLoadMode(EPWM5_BASE,
                                          EPWM_COUNTER_COMPARE_B,
                                          EPWM_COMP_LOAD_ON_CNTR_ZERO);
-
-    //
-    // Set Compare values
-    //
-    EPWM_setCounterCompareValue(EPWM5_BASE,
-                                EPWM_COUNTER_COMPARE_A,
-                                EPWM3_MIN_CMPA);
-
-    EPWM_setCounterCompareValue(EPWM5_BASE,
-                                EPWM_COUNTER_COMPARE_B,
-                                EPWM3_MAX_CMPB);
 
     //
     // Set actions
@@ -590,19 +607,19 @@ void initEPWM3(void)
     EPWM_setActionQualifierAction(EPWM5_BASE,
                                   EPWM_AQ_OUTPUT_A,
                                   EPWM_AQ_OUTPUT_HIGH,
-                                  EPWM_AQ_OUTPUT_ON_TIMEBASE_PERIOD);
+                                  EPWM_AQ_OUTPUT_ON_TIMEBASE_UP_CMPA);
     EPWM_setActionQualifierAction(EPWM5_BASE,
                                   EPWM_AQ_OUTPUT_A,
                                   EPWM_AQ_OUTPUT_LOW,
-                                  EPWM_AQ_OUTPUT_ON_TIMEBASE_DOWN_CMPB);
-    EPWM_setActionQualifierAction(EPWM5_BASE,
-                                  EPWM_AQ_OUTPUT_B,
-                                  EPWM_AQ_OUTPUT_LOW,
-                                  EPWM_AQ_OUTPUT_ON_TIMEBASE_PERIOD);
+                                  EPWM_AQ_OUTPUT_ON_TIMEBASE_DOWN_CMPA);
     EPWM_setActionQualifierAction(EPWM5_BASE,
                                   EPWM_AQ_OUTPUT_B,
                                   EPWM_AQ_OUTPUT_HIGH,
-                                  EPWM_AQ_OUTPUT_ON_TIMEBASE_UP_CMPA);
+                                  EPWM_AQ_OUTPUT_ON_TIMEBASE_UP_CMPB);
+    EPWM_setActionQualifierAction(EPWM5_BASE,
+                                  EPWM_AQ_OUTPUT_B,
+                                  EPWM_AQ_OUTPUT_LOW,
+                                  EPWM_AQ_OUTPUT_ON_TIMEBASE_DOWN_CMPB);
 
     //
     // Interrupt where we will change the Compare Values
@@ -618,14 +635,14 @@ void initEPWM3(void)
     // CMPA/CMPB values are moving, the min and max allowed values and
     // a pointer to the correct ePWM registers
     //
-    epwm3Info.epwmCompADirection = EPWM_CMP_UP;
-    epwm3Info.epwmCompBDirection = EPWM_CMP_DOWN;
-    epwm3Info.epwmTimerIntCount = 0U;
-    epwm3Info.epwmModule = EPWM5_BASE;
-    epwm3Info.epwmMaxCompA = EPWM3_MAX_CMPA;
-    epwm3Info.epwmMinCompA = EPWM3_MIN_CMPA;
-    epwm3Info.epwmMaxCompB = EPWM3_MAX_CMPB;
-    epwm3Info.epwmMinCompB = EPWM3_MIN_CMPB;
+    epwm5Info.epwmCompADirection = EPWM_CMP_UP;
+    epwm5Info.epwmCompBDirection = EPWM_CMP_DOWN;
+    epwm5Info.epwmTimerIntCount = 0U;
+    epwm5Info.epwmModule = EPWM5_BASE;
+    epwm5Info.epwmMaxCompA = EPWM5_MAX_CMPA;
+    epwm5Info.epwmMinCompA = EPWM5_MIN_CMPA;
+    epwm5Info.epwmMaxCompB = EPWM5_MAX_CMPB;
+    epwm5Info.epwmMinCompB = EPWM5_MIN_CMPB;
 }
 
 //
