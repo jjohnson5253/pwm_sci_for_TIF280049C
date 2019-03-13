@@ -655,11 +655,11 @@ void initEPWM5(void)
                                   EPWM_AQ_OUTPUT_ON_TIMEBASE_DOWN_CMPA);
     EPWM_setActionQualifierAction(EPWM5_BASE,
                                   EPWM_AQ_OUTPUT_B,
-                                  EPWM_AQ_OUTPUT_HIGH,
+                                  EPWM_AQ_OUTPUT_LOW,
                                   EPWM_AQ_OUTPUT_ON_TIMEBASE_UP_CMPB);
     EPWM_setActionQualifierAction(EPWM5_BASE,
                                   EPWM_AQ_OUTPUT_B,
-                                  EPWM_AQ_OUTPUT_LOW,
+                                  EPWM_AQ_OUTPUT_HIGH,
                                   EPWM_AQ_OUTPUT_ON_TIMEBASE_DOWN_CMPB);
 
     //

@@ -1,7 +1,7 @@
 ******************************************************************************
              TMS320C2000 Linker PC v18.1.3                     
 ******************************************************************************
->> Linked Tue Mar 12 00:29:02 2019
+>> Linked Wed Mar 13 16:58:45 2019
 
 OUTPUT FILE NAME:   <pwm5a5b_on_launchpad.out>
 ENTRY POINT SYMBOL: "code_start"  address: 00000000
