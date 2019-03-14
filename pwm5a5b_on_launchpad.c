@@ -79,11 +79,11 @@
 #define EPWM2_MIN_CMPB       50U
 
 //#define EPWM5_TIMER_TBPRD  2000U // about 25kHz
-#define EPWM5_TIMER_TBPRD  4000U // about 25kHz
-#define EPWM5_MAX_CMPA     2000U // 50% duty cycle
-#define EPWM5_MIN_CMPA     2000U
-#define EPWM5_MAX_CMPB     2000U
-#define EPWM5_MIN_CMPB     2000U
+#define EPWM5_TIMER_TBPRD  850 // about 25kHz
+#define EPWM5_MAX_CMPA     425 // 50% duty cycle
+#define EPWM5_MIN_CMPA     425
+#define EPWM5_MAX_CMPB     425
+#define EPWM5_MIN_CMPB     425
 
 //#define EPWM5_TIMER_TBPRD  2000U
 //#define EPWM5_MAX_CMPA     1950U
@@ -144,6 +144,11 @@ void main(void)
 
     uint16_t receivedChar;
     unsigned char *msg;
+
+    int dutyCycle = 425;
+    double dutyCycleTrack = 0.5;
+    int period = 850;
+    int guiState = 0;
 
     //
     // Initialize device clock and peripherals
@@ -281,88 +286,144 @@ void main(void)
     //
     for(;;)
     {
-        msg = "\r\n\nChoose a duty cycle or period: \n\0";
-        SCI_writeCharArray(SCIA_BASE, (uint16_t*)msg, 36);
-        msg = "\r\n 1. 25% \n\0";
-        SCI_writeCharArray(SCIA_BASE, (uint16_t*)msg, 9);
-        msg = "\r\n 2. 50% \n\0";
-        SCI_writeCharArray(SCIA_BASE, (uint16_t*)msg, 9);
-        msg = "\r\n 3. 75% \n\0";
-        SCI_writeCharArray(SCIA_BASE, (uint16_t*)msg, 9);
-        msg = "\r\n 4. 56kHz \n\0";
-        SCI_writeCharArray(SCIA_BASE, (uint16_t*)msg, 11);
-        msg = "\r\n 5. 25kHz \n\0";
-        SCI_writeCharArray(SCIA_BASE, (uint16_t*)msg, 11);
-        msg = "\r\n\nEnter number: \0";
-        SCI_writeCharArray(SCIA_BASE, (uint16_t*)msg, 17);
+        switch(guiState){
+        case 0:
+            msg = "\r\n\nChoose an option: \n\0";
+            SCI_writeCharArray(SCIA_BASE, (uint16_t*)msg, 23);
+            msg = "\r\n 1. Change duty cycle \n\0";
+            SCI_writeCharArray(SCIA_BASE, (uint16_t*)msg, 25);
+            msg = "\r\n 2. Change frequency \n\0";
+            SCI_writeCharArray(SCIA_BASE, (uint16_t*)msg, 24);
+            msg = "\r\n 3. Power off \n\0";
+            SCI_writeCharArray(SCIA_BASE, (uint16_t*)msg, 17);
+            msg = "\r\n\nEnter number: \0";
+            SCI_writeCharArray(SCIA_BASE, (uint16_t*)msg, 17);
 
-        //
-        // Read a character from the FIFO.
-        //
-        receivedChar = SCI_readCharBlockingFIFO(SCIA_BASE);
+            // Read a character from the FIFO.
+            receivedChar = SCI_readCharBlockingFIFO(SCIA_BASE);
 
-        //TODO: Figure out how to print to console for debugging,etc.
+            switch(receivedChar) {
+               case 49  :
+                   guiState = 1;
+                   break;
+               case 50  :
+                   guiState = 2;
+                   break;
+               case 51  :
+                   // Enter halt mode.
+                   SysCtl_enterHaltMode();
+               default :
+                   msg = "\r\nPlease choose one of the options\n\0";
+                   SCI_writeCharArray(SCIA_BASE, (uint16_t*)msg, 36);
+                   break;
+            }
+            break;
 
-        if (receivedChar == 49){ // option 1
-
-            // Turn on LED
-            GPIO_writePin(DEVICE_GPIO_PIN_LED1, 0);
-
-            // 25% duty cycle
-            EPWM_setCounterCompareValue(EPWM5_BASE, EPWM_COUNTER_COMPARE_A, 3000);
-            EPWM_setCounterCompareValue(EPWM5_BASE, EPWM_COUNTER_COMPARE_B, 3000);
-
-        }
-        else if (receivedChar == 50){ // option 2
-
-            // Turn off LED
-            GPIO_writePin(DEVICE_GPIO_PIN_LED1, 1);
-
-            // 50% duty cycle
-            EPWM_setCounterCompareValue(EPWM5_BASE, EPWM_COUNTER_COMPARE_A, 2000);
-            EPWM_setCounterCompareValue(EPWM5_BASE, EPWM_COUNTER_COMPARE_B, 2000);
-
-        }
-        else if (receivedChar == 51){ // option 3
-
-            // Turn off LED
-            GPIO_writePin(DEVICE_GPIO_PIN_LED1, 1);
-
-            // 75% duty cycle
-            EPWM_setCounterCompareValue(EPWM5_BASE, EPWM_COUNTER_COMPARE_A, 1000);
-            EPWM_setCounterCompareValue(EPWM5_BASE, EPWM_COUNTER_COMPARE_B, 1000);
-
-        }
-        else if (receivedChar == 52){ // option 4
-
-            // Turn off LED
-            GPIO_writePin(DEVICE_GPIO_PIN_LED1, 1);
-
-            // 50 kHz
-            EPWM_setTimeBasePeriod(EPWM5_BASE, EPWM5_TIMER_TBPRD);
-
-        }
-        else if (receivedChar == 52){ // option 5
-
-            // Turn off LED
-            GPIO_writePin(DEVICE_GPIO_PIN_LED1, 1);
-
-            // 25 kHz
-            EPWM_setTimeBasePeriod(EPWM5_BASE, 2000);
-
-        }
-        else{
-            msg = "\r\nPlease choose one of the options\n\0";
+        case 1:
+            msg = "\r\n\nChoose a duty cycle or period: \n\0";
             SCI_writeCharArray(SCIA_BASE, (uint16_t*)msg, 36);
-        }
+            msg = "\r\n 1. 25% \n\0";
+            SCI_writeCharArray(SCIA_BASE, (uint16_t*)msg, 9);
+            msg = "\r\n 2. 50% \n\0";
+            SCI_writeCharArray(SCIA_BASE, (uint16_t*)msg, 9);
+            msg = "\r\n 3. 75% \n\0";
+            SCI_writeCharArray(SCIA_BASE, (uint16_t*)msg, 9);
+            msg = "\r\n\4. Go back \n\0";
+            SCI_writeCharArray(SCIA_BASE, (uint16_t*)msg, 13);
+            msg = "\r\n\nEnter number: \0";
+            SCI_writeCharArray(SCIA_BASE, (uint16_t*)msg, 17);
 
-        // Might need this writing of character function later, so leaving commented
-        //
-        // Echo back the character.
-        //
-//        msg = "  You sent: \0";
-//        SCI_writeCharArray(SCIA_BASE, (uint16_t*)msg, 13);
-//        SCI_writeCharBlockingFIFO(SCIA_BASE, receivedChar);
+            // Read a character from the FIFO.
+            receivedChar = SCI_readCharBlockingFIFO(SCIA_BASE);
+
+            switch(receivedChar) {
+               case 49  :
+                   // Turn on LED
+                   GPIO_writePin(DEVICE_GPIO_PIN_LED1, 0);
+                   // 25% duty cycle
+                   dutyCycleTrack = dutyCycleTrack + 0.1;
+                   dutyCycle = period * dutyCycleTrack;
+                   EPWM_setCounterCompareValue(EPWM5_BASE, EPWM_COUNTER_COMPARE_A, dutyCycle);
+                   EPWM_setCounterCompareValue(EPWM5_BASE, EPWM_COUNTER_COMPARE_B, dutyCycle);
+                   break;
+               case 50  :
+                   // Turn off LED
+                   GPIO_writePin(DEVICE_GPIO_PIN_LED1, 1);
+                   // 50% duty cycle
+                   dutyCycleTrack = dutyCycleTrack - 0.1;
+                   dutyCycle = period * dutyCycleTrack;
+                   EPWM_setCounterCompareValue(EPWM5_BASE, EPWM_COUNTER_COMPARE_A, dutyCycle);
+                   EPWM_setCounterCompareValue(EPWM5_BASE, EPWM_COUNTER_COMPARE_B, dutyCycle);
+                   break;
+               case 51  :
+                   // 50% duty cycle
+                   dutyCycleTrack = 0.25;
+                   dutyCycle = period * 0.25;
+                   EPWM_setCounterCompareValue(EPWM5_BASE, EPWM_COUNTER_COMPARE_A, dutyCycle);
+                   EPWM_setCounterCompareValue(EPWM5_BASE, EPWM_COUNTER_COMPARE_B, dutyCycle);
+                   break;
+               case 52  :
+                   guiState = 0;
+                   break;
+               default :
+                   msg = "\r\nPlease choose one of the options\n\0";
+                   SCI_writeCharArray(SCIA_BASE, (uint16_t*)msg, 36);
+            }
+            break;
+
+        case 2:
+            msg = "\r\n\nChoose a duty cycle or period: \n\0";
+            SCI_writeCharArray(SCIA_BASE, (uint16_t*)msg, 36);
+            msg = "\r\n 1. Decrease Frequency \n\0";
+            SCI_writeCharArray(SCIA_BASE, (uint16_t*)msg, 24);
+            msg = "\r\n 2. Increase Frequency \n\0";
+            SCI_writeCharArray(SCIA_BASE, (uint16_t*)msg, 24);
+            msg = "\r\n\3. Go back \n\0";
+            SCI_writeCharArray(SCIA_BASE, (uint16_t*)msg, 13);
+            msg = "\r\n\nEnter number: \0";
+            SCI_writeCharArray(SCIA_BASE, (uint16_t*)msg, 17);
+
+            // Read a character from the FIFO.
+            receivedChar = SCI_readCharBlockingFIFO(SCIA_BASE);
+
+            switch(receivedChar) {
+               case 49  :
+                   if(period < 1500){
+                       // decrease frequency increase period
+                       period = period + 50;
+                   }
+                   // update duty cycle to new period
+                   dutyCycle = period * dutyCycleTrack;
+                   EPWM_setCounterCompareValue(EPWM5_BASE, EPWM_COUNTER_COMPARE_A, dutyCycle);
+                   EPWM_setCounterCompareValue(EPWM5_BASE, EPWM_COUNTER_COMPARE_B, dutyCycle);
+                   // update period
+                   EPWM_setTimeBasePeriod(EPWM5_BASE, period);
+                   break;
+               case 50  :
+                   if(period > 500){
+                       // increase frequency decrease period
+                       period = period - 50;
+                   }
+                   // update duty cycle to new period
+                   dutyCycle = period * dutyCycleTrack;
+                   EPWM_setCounterCompareValue(EPWM5_BASE, EPWM_COUNTER_COMPARE_A, dutyCycle);
+                   EPWM_setCounterCompareValue(EPWM5_BASE, EPWM_COUNTER_COMPARE_B, dutyCycle);
+                   // update period
+                   EPWM_setTimeBasePeriod(EPWM5_BASE, period);
+                   break;
+               case 51  :
+                   guiState = 0;
+                   break;
+               default :
+                   msg = "\r\nPlease choose one of the options\n\0";
+                   SCI_writeCharArray(SCIA_BASE, (uint16_t*)msg, 36);
+            }
+            break;
+
+        default:
+            guiState = 0;
+            break;
+        }
 
         NOP;
     }
