@@ -58,6 +58,8 @@
 //
 #include "driverlib.h"
 #include "device.h"
+#include <stdio.h>
+#include "sci.h"
 
 //
 // Defines
@@ -131,6 +133,7 @@ epwmInformation epwm5Info;
 void initEPWM1(void);
 void initEPWM2(void);
 void initEPWM5(void);
+void itoa(long unsigned int value, char* result, int base);
 __interrupt void epwm1ISR(void);
 __interrupt void epwm2ISR(void);
 __interrupt void epwm5ISR(void);
@@ -144,10 +147,13 @@ void main(void)
 
     uint16_t receivedChar;
     unsigned char *msg;
+    char *test;
 
     int dutyCycle = 425;
     double dutyCycleTrack = 0.5;
+    int dutyCyclePrint = 0;
     int period = 850;
+    int frequencyPrint = 0;
     int guiState = 0;
 
     //
@@ -286,6 +292,19 @@ void main(void)
     //
     for(;;)
     {
+        // print a bunch of new lines to clear out window
+        msg = "\r\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\0";
+        SCI_writeCharArray(SCIA_BASE, (uint16_t*)msg, 25);
+        //itoa(50, test, 10);
+        //SCI_writeCharArray(SCIA_BASE, (uint16_t*)msg, 5);
+
+
+        // print duty cycle and frequency
+        //dutyCyclePrint = 100 - (100 * dutyCycleTrack);
+        //TODO: convert int to string for printing. Unable to use sprintf or itoa.
+        //TODO: fix freq calculation getting overflow or something (get -9000 instead of 56000)
+        //frequencyPrint = (period / 1000) * 66;  // 66 is the constant I calculated to find frequency from period. Since 850counts = ~56000Hz.
+
         switch(guiState){
         case 0:
             msg = "\r\n\nChoose an option: \n\0";
@@ -294,8 +313,8 @@ void main(void)
             SCI_writeCharArray(SCIA_BASE, (uint16_t*)msg, 25);
             msg = "\r\n 2. Change frequency \n\0";
             SCI_writeCharArray(SCIA_BASE, (uint16_t*)msg, 24);
-            msg = "\r\n 3. Power off \n\0";
-            SCI_writeCharArray(SCIA_BASE, (uint16_t*)msg, 17);
+            msg = "\r\n 3. Power off \0";
+            SCI_writeCharArray(SCIA_BASE, (uint16_t*)msg, 15);
             msg = "\r\n\nEnter number: \0";
             SCI_writeCharArray(SCIA_BASE, (uint16_t*)msg, 17);
 
@@ -320,15 +339,11 @@ void main(void)
             break;
 
         case 1:
-            msg = "\r\n\nChoose a duty cycle or period: \n\0";
-            SCI_writeCharArray(SCIA_BASE, (uint16_t*)msg, 36);
-            msg = "\r\n 1. 25% \n\0";
-            SCI_writeCharArray(SCIA_BASE, (uint16_t*)msg, 9);
-            msg = "\r\n 2. 50% \n\0";
-            SCI_writeCharArray(SCIA_BASE, (uint16_t*)msg, 9);
-            msg = "\r\n 3. 75% \n\0";
-            SCI_writeCharArray(SCIA_BASE, (uint16_t*)msg, 9);
-            msg = "\r\n\4. Go back \n\0";
+            msg = "\r\n 1. Decrease duty cycle \n\0";
+            SCI_writeCharArray(SCIA_BASE, (uint16_t*)msg, 27);
+            msg = "\r\n 2. Increase duty cycle \n\0";
+            SCI_writeCharArray(SCIA_BASE, (uint16_t*)msg, 27);
+            msg = "\r\n 3. Go back \n\0";
             SCI_writeCharArray(SCIA_BASE, (uint16_t*)msg, 13);
             msg = "\r\n\nEnter number: \0";
             SCI_writeCharArray(SCIA_BASE, (uint16_t*)msg, 17);
@@ -340,8 +355,10 @@ void main(void)
                case 49  :
                    // Turn on LED
                    GPIO_writePin(DEVICE_GPIO_PIN_LED1, 0);
-                   // 25% duty cycle
-                   dutyCycleTrack = dutyCycleTrack + 0.1;
+                   // decrease duty cycle
+                   if(dutyCycleTrack < .90){
+                       dutyCycleTrack = dutyCycleTrack + 0.05;
+                   }
                    dutyCycle = period * dutyCycleTrack;
                    EPWM_setCounterCompareValue(EPWM5_BASE, EPWM_COUNTER_COMPARE_A, dutyCycle);
                    EPWM_setCounterCompareValue(EPWM5_BASE, EPWM_COUNTER_COMPARE_B, dutyCycle);
@@ -349,36 +366,32 @@ void main(void)
                case 50  :
                    // Turn off LED
                    GPIO_writePin(DEVICE_GPIO_PIN_LED1, 1);
-                   // 50% duty cycle
-                   dutyCycleTrack = dutyCycleTrack - 0.1;
+                   // increase duty cycle
+                   if(dutyCycleTrack > .10){
+                       dutyCycleTrack = dutyCycleTrack - 0.05;
+                   }
                    dutyCycle = period * dutyCycleTrack;
                    EPWM_setCounterCompareValue(EPWM5_BASE, EPWM_COUNTER_COMPARE_A, dutyCycle);
                    EPWM_setCounterCompareValue(EPWM5_BASE, EPWM_COUNTER_COMPARE_B, dutyCycle);
                    break;
                case 51  :
-                   // 50% duty cycle
-                   dutyCycleTrack = 0.25;
-                   dutyCycle = period * 0.25;
-                   EPWM_setCounterCompareValue(EPWM5_BASE, EPWM_COUNTER_COMPARE_A, dutyCycle);
-                   EPWM_setCounterCompareValue(EPWM5_BASE, EPWM_COUNTER_COMPARE_B, dutyCycle);
-                   break;
-               case 52  :
+                   // return to home
                    guiState = 0;
                    break;
                default :
                    msg = "\r\nPlease choose one of the options\n\0";
                    SCI_writeCharArray(SCIA_BASE, (uint16_t*)msg, 36);
             }
+//            dutyCyclePrint = 100 - (int)(100 * dutyCycleTrack);
+//            frequencyPrint = (int)(period * 66);  // 66 is the constant I calculated to find frequency from period. Since 850counts = ~56000Hz.
             break;
 
         case 2:
-            msg = "\r\n\nChoose a duty cycle or period: \n\0";
-            SCI_writeCharArray(SCIA_BASE, (uint16_t*)msg, 36);
-            msg = "\r\n 1. Decrease Frequency \n\0";
-            SCI_writeCharArray(SCIA_BASE, (uint16_t*)msg, 24);
-            msg = "\r\n 2. Increase Frequency \n\0";
-            SCI_writeCharArray(SCIA_BASE, (uint16_t*)msg, 24);
-            msg = "\r\n\3. Go back \n\0";
+            msg = "\r\n 1. Decrease frequency \n\0";
+            SCI_writeCharArray(SCIA_BASE, (uint16_t*)msg, 26);
+            msg = "\r\n 2. Increase frequency \n\0";
+            SCI_writeCharArray(SCIA_BASE, (uint16_t*)msg, 26);
+            msg = "\r\n 3. Go back \n\0";
             SCI_writeCharArray(SCIA_BASE, (uint16_t*)msg, 13);
             msg = "\r\n\nEnter number: \0";
             SCI_writeCharArray(SCIA_BASE, (uint16_t*)msg, 17);
@@ -418,6 +431,8 @@ void main(void)
                    msg = "\r\nPlease choose one of the options\n\0";
                    SCI_writeCharArray(SCIA_BASE, (uint16_t*)msg, 36);
             }
+//            dutyCyclePrint = 100 - (int)(100 * dutyCycleTrack);
+//            frequencyPrint = (int)(period * 66);  // 66 is the constant I calculated to find frequency from period. Since 850counts = ~56000Hz.
             break;
 
         default:
@@ -491,6 +506,32 @@ __interrupt void epwm5ISR(void)
     //
     Interrupt_clearACKGroup(INTERRUPT_ACK_GROUP3);
 }
+
+//// Implementation of itoa()
+//void itoa(long unsigned int value, char* result, int base)
+//{
+//    // check that the base if valid
+//    if (base < 2 || base > 36) { *result = '\0';}
+//
+//    char* ptr = result, *ptr1 = result, tmp_char;
+//    int tmp_value;
+//
+//    do {
+//    tmp_value = value;
+//    value /= base;
+//    *ptr++ = "zyxwvutsrqponmlkjihgfedcba9876543210123456789abcdefghijklmnopqrstuvwxyz" [35 + (tmp_value - value * base)];
+//    } while ( value );
+//
+//    // Apply negative sign
+//    if (tmp_value < 0) *ptr++ = '-';
+//    *ptr-- = '\0';
+//    while(ptr1 < ptr) {
+//    tmp_char = *ptr;
+//    *ptr--= *ptr1;
+//    *ptr1++ = tmp_char;
+//    }
+//
+//}
 
 //
 // initEPWM1 - Configure ePWM1

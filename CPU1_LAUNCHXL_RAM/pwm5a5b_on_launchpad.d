@@ -78,6 +78,10 @@ pwm5a5b_on_launchpad.obj: C:/ti/c2000/C2000Ware_1_00_06_00/driverlib/f28004x/dri
 pwm5a5b_on_launchpad.obj: C:/ti/c2000/C2000Ware_1_00_06_00/driverlib/f28004x/driverlib/inc/hw_spi.h
 pwm5a5b_on_launchpad.obj: C:/ti/c2000/C2000Ware_1_00_06_00/driverlib/f28004x/driverlib/version.h
 pwm5a5b_on_launchpad.obj: C:/Users/jake/workspace_v8/pwm5a5b_on_launchpad/device/device.h
+pwm5a5b_on_launchpad.obj: C:/ti/ccsv8/tools/compiler/ti-cgt-c2000_18.1.3.LTS/include/stdio.h
+pwm5a5b_on_launchpad.obj: C:/ti/ccsv8/tools/compiler/ti-cgt-c2000_18.1.3.LTS/include/_ti_config.h
+pwm5a5b_on_launchpad.obj: C:/ti/ccsv8/tools/compiler/ti-cgt-c2000_18.1.3.LTS/include/linkage.h
+pwm5a5b_on_launchpad.obj: C:/ti/ccsv8/tools/compiler/ti-cgt-c2000_18.1.3.LTS/include/stdarg.h
 
 ../pwm5a5b_on_launchpad.c: 
 C:/Users/jake/workspace_v8/pwm5a5b_on_launchpad/device/driverlib.h: 
@@ -157,3 +161,7 @@ C:/ti/c2000/C2000Ware_1_00_06_00/driverlib/f28004x/driverlib/spi.h:
 C:/ti/c2000/C2000Ware_1_00_06_00/driverlib/f28004x/driverlib/inc/hw_spi.h: 
 C:/ti/c2000/C2000Ware_1_00_06_00/driverlib/f28004x/driverlib/version.h: 
 C:/Users/jake/workspace_v8/pwm5a5b_on_launchpad/device/device.h: 
+C:/ti/ccsv8/tools/compiler/ti-cgt-c2000_18.1.3.LTS/include/stdio.h: 
+C:/ti/ccsv8/tools/compiler/ti-cgt-c2000_18.1.3.LTS/include/_ti_config.h: 
+C:/ti/ccsv8/tools/compiler/ti-cgt-c2000_18.1.3.LTS/include/linkage.h: 
+C:/ti/ccsv8/tools/compiler/ti-cgt-c2000_18.1.3.LTS/include/stdarg.h: 
